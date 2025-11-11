@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ESP32 Photo Server</title>
+  <style>
+    body { font-family: Arial; text-align: center; background-color: #fafafa; }
+    button { padding: 12px 20px; margin: 10px; font-size: 16px; border-radius: 8px; }
+    img { width: 70%; border-radius: 10px; margin-top: 20px; }
+    pre { text-align: left; margin: 20px auto; width: 80%; background: #f2f2f2; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h2>ESP32 HTTP Photo Server</h2>
+  <button onclick="capturePhoto()">Capture Photo</button>
+  <button onclick="listPhotos()">List Photos</button>
+  <div id="output"></div>
+
+  <script>
+    async function capturePhoto() {
+      document.getElementById('output').innerHTML = 'Capturing...';
+      await fetch('/capture');
+      listPhotos();
+    }
+
+    async function listPhotos() {
+      const res = await fetch('/photos');
+      const text = await res.text();
+      const lines = text.trim().split('\n').slice(1);
+      let html = '<h3>Saved Photos</h3><pre>' + text + '</pre>';
+      lines.forEach(line => {
+        const file = line.split(' ')[0];
+        if (file.endsWith('.jpg')) {
+          html += `<img src="/photo?name=${file}" alt="photo"><br>`;
+        }
+      });
+      document.getElementById('output').innerHTML = html;
+    }
+  </script>
+</body>
+</html>
